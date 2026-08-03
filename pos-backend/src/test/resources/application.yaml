@@ -1,0 +1,9 @@
+# Override for integration tests - Redis is not tested in the smoke test
+spring:
+  data:
+    redis:
+      # Use a non-connecting lazy mode; tests won't invoke Redis
+      timeout: 1ms
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
