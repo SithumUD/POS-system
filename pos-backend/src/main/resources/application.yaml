@@ -2,12 +2,12 @@ spring:
   application:
     name: pos-backend
 
-  # Docker Compose integration (requires Docker Desktop to be running)
-  # Set enabled: false to manage services manually instead of auto-starting them
+  # Docker Compose integration
+  # Set enabled: false so Spring Boot connects to existing local/docker services without port binding errors
   docker:
     compose:
-      enabled: true
-      lifecycle-management: start-only   # start on app launch, don't stop on shutdown
+      enabled: false
+      lifecycle-management: start-only
 
   # PostgreSQL datasource
   datasource:
@@ -41,3 +41,25 @@ spring:
     port: 5672
     username: guest
     password: guest
+
+# Custom Application Properties
+app:
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    access-token-expiration-ms: 86400000 # 24 hours (86400000 ms)
+    refresh-token-expiration-ms: 604800000 # 7 days (604800000 ms)
+  cors:
+    allowed-origins:
+      - "http://localhost:5173"
+      - "http://localhost:3000"
+      - "http://localhost:4173"
+    allowed-methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "PATCH"
+      - "OPTIONS"
+    allowed-headers: "*"
+    allow-credentials: true
+
