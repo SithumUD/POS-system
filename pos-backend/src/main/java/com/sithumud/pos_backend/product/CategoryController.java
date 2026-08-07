@@ -31,7 +31,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @GetMapping
+    @GetMapping(value = {"", "/tree"})
     @Operation(summary = "Get category hierarchy", description = "Retrieves top-level categories with sub-categories and product counts.")
     public ResponseEntity<ApiResponse<List<CategoryDto>>> getCategories() {
         List<CategoryDto> categories = categoryService.getCategoryHierarchy();

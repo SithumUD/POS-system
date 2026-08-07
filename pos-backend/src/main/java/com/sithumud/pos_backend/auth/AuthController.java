@@ -46,4 +46,20 @@ public class AuthController {
         UserDto userDto = authService.getCurrentUserContext(currentUser);
         return ResponseEntity.ok(ApiResponse.success(userDto, "User context retrieved successfully"));
     }
+
+    @GetMapping("/invite/{token}")
+    @Operation(summary = "Get invitation details", description = "Fetches details of a user invitation by token.")
+    public ResponseEntity<ApiResponse<com.sithumud.pos_backend.auth.dto.InvitationDetailsDto>> getInvitationDetails(
+            @org.springframework.web.bind.annotation.PathVariable String token) {
+        var details = authService.getInvitationDetails(token);
+        return ResponseEntity.ok(ApiResponse.success(details, "Invitation details retrieved successfully"));
+    }
+
+    @PostMapping("/accept-invite")
+    @Operation(summary = "Accept invitation", description = "Sets user password and activates account via invitation token.")
+    public ResponseEntity<ApiResponse<AuthResponse>> acceptInvitation(
+            @Valid @RequestBody com.sithumud.pos_backend.auth.dto.AcceptInviteRequest request) {
+        AuthResponse response = authService.acceptInvitation(request);
+        return ResponseEntity.ok(ApiResponse.success(response, "Account activated successfully"));
+    }
 }

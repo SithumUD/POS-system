@@ -71,6 +71,17 @@ class CategoryControllerTest {
     }
 
     @Test
+    void testGetCategoryTreeSuccess() throws Exception {
+        given(categoryService.getCategoryHierarchy()).willReturn(List.of(mockCategoryDto));
+
+        mockMvc.perform(get("/api/v1/categories/tree"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].name").value("Beverages"))
+                .andExpect(jsonPath("$.data[0].slug").value("beverages"));
+    }
+
+    @Test
     void testGetCategoryByIdSuccess() throws Exception {
         UUID id = mockCategoryDto.getId();
         given(categoryService.getCategoryById(id)).willReturn(mockCategoryDto);

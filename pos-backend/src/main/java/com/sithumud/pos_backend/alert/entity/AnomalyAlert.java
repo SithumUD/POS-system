@@ -2,6 +2,7 @@ package com.sithumud.pos_backend.alert.entity;
 
 import com.sithumud.pos_backend.branch.entity.Branch;
 import com.sithumud.pos_backend.common.entity.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -41,6 +42,9 @@ public class AnomalyAlert extends BaseEntity {
     private String title;
 
     private String description;
+
+    @Column(columnDefinition = "TEXT")
+    private String explanation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "branch_id")

@@ -119,7 +119,7 @@ class BranchControllerTest {
     @Test
     void testUpdateBranchSuccess() throws Exception {
         UUID id = mockBranchDto.getId();
-        given(branchService.updateBranch(eq(id), any(UpdateBranchRequest.class))).willReturn(mockBranchDto);
+        given(branchService.updateBranch(eq(id.toString()), any(UpdateBranchRequest.class))).willReturn(mockBranchDto);
 
         UpdateBranchRequest request = UpdateBranchRequest.builder()
                 .name("Kandy City Store")
@@ -140,7 +140,7 @@ class BranchControllerTest {
     @Test
     void testDeleteBranchSuccess() throws Exception {
         UUID id = mockBranchDto.getId();
-        willDoNothing().given(branchService).deleteBranch(id);
+        willDoNothing().given(branchService).deleteBranch(id.toString());
 
         mockMvc.perform(delete("/api/v1/branches/{id}", id))
                 .andExpect(status().isOk())

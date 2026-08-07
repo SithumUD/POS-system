@@ -106,9 +106,8 @@ public class BranchService {
     }
 
     @Transactional
-    public BranchDto updateBranch(UUID id, UpdateBranchRequest request) {
-        Branch branch = branchRepository.findById(id)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "BRANCH_NOT_FOUND", "Store branch not found: " + id));
+    public BranchDto updateBranch(String idOrSlug, UpdateBranchRequest request) {
+        Branch branch = findBranchByIdOrSlug(idOrSlug);
 
         User manager = null;
         if (request.getManagerId() != null) {
@@ -141,12 +140,22 @@ public class BranchService {
     }
 
     @Transactional
-    public void deleteBranch(UUID id) {
-        Branch branch = branchRepository.findById(id)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "BRANCH_NOT_FOUND", "Store branch not found: " + id));
-
+    public void deleteBranch(String idOrSlug) {
+        Branch branch = findBranchByIdOrSlug(idOrSlug);
         branch.setStatus(BranchStatus.CLOSED);
         branchRepository.save(branch);
+    }
+
+    private Branch findBranchByIdOrSlug(String idOrSlug) {
+        try {
+            UUID id = UUID.fromString(idOrSlug);
+            return branchRepository.findById(id)
+                    .orElseGet(() -> branchRepository.findBySlug(idOrSlug)
+                            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "BRANCH_NOT_FOUND", "Store branch not found: " + idOrSlug)));
+        } catch (IllegalArgumentException e) {
+            return branchRepository.findBySlug(idOrSlug)
+                    .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "BRANCH_NOT_FOUND", "Store branch not found: " + idOrSlug));
+        }
     }
 
     private String generateSlug(String input) {

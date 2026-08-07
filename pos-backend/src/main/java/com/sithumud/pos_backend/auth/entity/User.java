@@ -80,4 +80,10 @@ public class User extends BaseEntity {
 
     @Column(name = "avatar_url")
     private String avatarUrl;
+
+    @Column(name = "invitation_token", unique = true)
+    private String invitationToken;
+
+    @Column(name = "invitation_token_expires_at")
+    private Instant invitationTokenExpiresAt;
 }

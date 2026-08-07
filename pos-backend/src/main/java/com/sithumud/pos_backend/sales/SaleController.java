@@ -38,6 +38,7 @@ import java.util.UUID;
 public class SaleController {
 
     private final SaleService saleService;
+    private final ReceiptPrinterService receiptPrinterService;
 
     @GetMapping
     @Operation(summary = "Get sales history", description = "Retrieves a paginated list of historical sales with filters for date range, branch, cashier, payment method, transaction status, and receipt search.")
@@ -91,15 +92,22 @@ public class SaleController {
     }
 
     @PostMapping("/{id}/refund")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @Operation(summary = "Refund completed sale", description = "Processes a full or partial sale refund.")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @Operation(summary = "Refund sale", description = "Perform a partial or full refund of a sale, returning items to stock.")
     public ResponseEntity<ApiResponse<SaleDto>> refundSale(
             @PathVariable UUID id,
             @Valid @RequestBody RefundSaleRequest request,
-            @AuthenticationPrincipal UserPrincipal user
+            @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        SaleDto refundedSale = saleService.refundSale(id, request, user);
+        SaleDto refundedSale = saleService.refundSale(id, request, userPrincipal);
         return ResponseEntity.ok(ApiResponse.success(refundedSale, "Sale refunded successfully"));
+    }
+
+    @GetMapping("/{id}/print")
+    @Operation(summary = "Get print receipt data", description = "Generates raw ESC/POS byte string (Base64) for bluetooth printing")
+    public ResponseEntity<ApiResponse<String>> getPrintReceiptData(@PathVariable UUID id) {
+        String base64Receipt = receiptPrinterService.generateReceipt(id);
+        return ResponseEntity.ok(ApiResponse.success(base64Receipt, "Receipt generated successfully"));
     }
 
     @GetMapping("/{id}/receipt")

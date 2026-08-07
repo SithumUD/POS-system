@@ -17,6 +17,6 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, UU
 
     boolean existsByPoNumber(String poNumber);
 
-    @Query("SELECT po FROM PurchaseOrder po LEFT JOIN FETCH po.items LEFT JOIN FETCH po.events LEFT JOIN FETCH po.supplier LEFT JOIN FETCH po.branch WHERE po.id = :id")
+    @Query("SELECT DISTINCT po FROM PurchaseOrder po LEFT JOIN FETCH po.items LEFT JOIN FETCH po.supplier LEFT JOIN FETCH po.branch WHERE po.id = :id")
     Optional<PurchaseOrder> findByIdWithDetails(@Param("id") UUID id);
 }

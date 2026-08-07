@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.sithumud.pos_backend.branch.BranchRepository;
+import com.sithumud.pos_backend.branch.entity.Branch;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -45,6 +48,7 @@ public class AlertService {
     private final SaleRepository saleRepository;
     private final StockMovementRepository stockMovementRepository;
     private final InventoryRepository inventoryRepository;
+    private final BranchRepository branchRepository;
 
     @Transactional(readOnly = true)
     public Page<AnomalyAlertDto> getAlerts(AlertSearchFilter filter, Pageable pageable) {
@@ -118,19 +122,23 @@ public class AlertService {
     public ScanSummaryDto runHeuristicScan() {
         List<AnomalyAlert> generated = new ArrayList<>();
         Instant past24h = Instant.now().minus(24, ChronoUnit.HOURS);
+        Branch defaultBranch = branchRepository.findAll().stream().findFirst().orElse(null);
 
         // 1. Elevated Voids Heuristic
         List<Sale> voidedSales = saleRepository.findByStatusAndCreatedAtBetween(SaleStatus.VOIDED, past24h, Instant.now());
         if (voidedSales.size() >= 2) {
             String title = "Elevated Voided Sales Activity";
             if (!alertRepository.existsByTitle(title)) {
+                String desc = String.format("Detected %d voided transactions in the last 24 hours.", voidedSales.size());
+                Branch b = (voidedSales.isEmpty() || voidedSales.get(0).getBranch() == null) ? defaultBranch : voidedSales.get(0).getBranch();
                 AnomalyAlert voidAlert = AnomalyAlert.builder()
                         .type(AlertType.ELEVATED_VOIDS)
                         .severity(AlertSeverity.HIGH)
                         .status(AlertStatus.NEW)
                         .title(title)
-                        .description(String.format("Detected %d voided transactions in the last 24 hours.", voidedSales.size()))
-                        .branch(voidedSales.get(0).getBranch())
+                        .description(desc)
+                        .explanation(desc)
+                        .branch(b)
                         .detectedAt(Instant.now())
                         .build();
                 generated.add(alertRepository.save(voidAlert));
@@ -146,13 +154,16 @@ public class AlertService {
         if (maxDiscountCount >= 2) {
             String title = "Limit-Hugging Cashier Discounting";
             if (!alertRepository.existsByTitle(title)) {
+                String desc = String.format("Detected %d transactions with maximum threshold discounts applied.", maxDiscountCount);
+                Branch b = (completedSales.isEmpty() || completedSales.get(0).getBranch() == null) ? defaultBranch : completedSales.get(0).getBranch();
                 AnomalyAlert discountAlert = AnomalyAlert.builder()
                         .type(AlertType.LIMIT_HUGGING_DISCOUNTS)
                         .severity(AlertSeverity.MEDIUM)
                         .status(AlertStatus.NEW)
                         .title(title)
-                        .description(String.format("Detected %d transactions with maximum threshold discounts applied.", maxDiscountCount))
-                        .branch(completedSales.isEmpty() ? null : completedSales.get(0).getBranch())
+                        .description(desc)
+                        .explanation(desc)
+                        .branch(b)
                         .detectedAt(Instant.now())
                         .build();
                 generated.add(alertRepository.save(discountAlert));
@@ -169,12 +180,16 @@ public class AlertService {
         if (removeCount >= 1) {
             String title = "Elevated Inventory Stock Write-Offs";
             if (!alertRepository.existsByTitle(title)) {
+                String desc = String.format("Detected %d large manual stock removal/correction adjustments.", removeCount);
+                Branch b = (movements.isEmpty() || movements.get(0).getBranch() == null) ? defaultBranch : movements.get(0).getBranch();
                 AnomalyAlert stockAlert = AnomalyAlert.builder()
                         .type(AlertType.STOCK_WRITE_OFFS)
                         .severity(AlertSeverity.HIGH)
                         .status(AlertStatus.NEW)
                         .title(title)
-                        .description(String.format("Detected %d large manual stock removal/correction adjustments.", removeCount))
+                        .description(desc)
+                        .explanation(desc)
+                        .branch(b)
                         .detectedAt(Instant.now())
                         .build();
                 generated.add(alertRepository.save(stockAlert));
@@ -189,13 +204,16 @@ public class AlertService {
         if (!zeroInventories.isEmpty()) {
             String title = "Zero-Stock Fast Mover Depletion";
             if (!alertRepository.existsByTitle(title)) {
+                String desc = String.format("Detected %d products with zero stock balance across branches.", zeroInventories.size());
+                Branch b = (zeroInventories.isEmpty() || zeroInventories.get(0).getBranch() == null) ? defaultBranch : zeroInventories.get(0).getBranch();
                 AnomalyAlert zeroStockAlert = AnomalyAlert.builder()
                         .type(AlertType.ZERO_STOCK_FAST_MOVERS)
                         .severity(AlertSeverity.MEDIUM)
                         .status(AlertStatus.NEW)
                         .title(title)
-                        .description(String.format("Detected %d products with zero stock balance across branches.", zeroInventories.size()))
-                        .branch(zeroInventories.get(0).getBranch())
+                        .description(desc)
+                        .explanation(desc)
+                        .branch(b)
                         .detectedAt(Instant.now())
                         .build();
                 generated.add(alertRepository.save(zeroStockAlert));

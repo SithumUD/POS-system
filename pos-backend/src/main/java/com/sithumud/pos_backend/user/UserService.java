@@ -22,6 +22,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.sithumud.pos_backend.common.email.EmailService;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -40,6 +43,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BranchRepository branchRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     private final Map<Role, List<String>> rolePermissionsMap = new EnumMap<>(Role.class);
 
@@ -54,6 +58,9 @@ public class UserService {
         ));
         rolePermissionsMap.put(Role.CASHIER, List.of(
                 "POS_CHECKOUT", "CATALOGUE_VIEW", "INVENTORY_VIEW"
+        ));
+        rolePermissionsMap.put(Role.VIEWER, List.of(
+                "CATALOGUE_VIEW", "INVENTORY_VIEW", "PURCHASING_VIEW", "ANALYTICS_VIEW", "ALERTS_VIEW", "BRANCHES_VIEW"
         ));
     }
 
@@ -109,17 +116,38 @@ public class UserService {
                     .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "BRANCH_NOT_FOUND", "Branch not found: " + request.getBranchSlug()));
         }
 
+        UserStatus status = request.getStatus() != null ? request.getStatus() : UserStatus.ACTIVE;
+        String invitationToken = null;
+        Instant expiresAt = null;
+
+        if (status == UserStatus.INVITED) {
+            invitationToken = UUID.randomUUID().toString();
+            expiresAt = Instant.now().plus(24, ChronoUnit.HOURS);
+        }
+
+        String rawPassword = request.getPassword();
+        if (!StringUtils.hasText(rawPassword)) {
+            rawPassword = UUID.randomUUID().toString(); // Fallback for invited users
+        }
+
         User user = User.builder()
                 .name(request.getName().trim())
                 .email(request.getEmail().trim().toLowerCase())
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .passwordHash(passwordEncoder.encode(rawPassword))
                 .role(request.getRole())
-                .status(request.getStatus() != null ? request.getStatus() : UserStatus.ACTIVE)
+                .status(status)
                 .branch(branch)
                 .avatarUrl(request.getAvatarUrl())
+                .invitationToken(invitationToken)
+                .invitationTokenExpiresAt(expiresAt)
                 .build();
 
         User saved = userRepository.save(user);
+
+        if (status == UserStatus.INVITED && invitationToken != null) {
+            emailService.sendInvitationEmail(saved, invitationToken);
+        }
+
         return UserDto.fromEntity(saved);
     }
 

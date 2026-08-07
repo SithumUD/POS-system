@@ -93,6 +93,12 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
+		<!-- Mail / Brevo SMTP -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
 		<!-- Event bus (RabbitMQ) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

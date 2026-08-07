@@ -24,7 +24,7 @@ public interface SaleRepository extends JpaRepository<Sale, UUID>, JpaSpecificat
 
     boolean existsByReceiptNumber(String receiptNumber);
 
-    @Query("SELECT s FROM Sale s LEFT JOIN FETCH s.items LEFT JOIN FETCH s.payments LEFT JOIN FETCH s.branch LEFT JOIN FETCH s.cashier WHERE s.id = :id")
+    @Query("SELECT DISTINCT s FROM Sale s LEFT JOIN FETCH s.items LEFT JOIN FETCH s.branch LEFT JOIN FETCH s.cashier WHERE s.id = :id")
     Optional<Sale> findByIdWithDetails(@Param("id") UUID id);
 
     List<Sale> findByBranchSlugAndStatusAndCreatedAtBetween(String branchSlug, SaleStatus status, Instant startDate, Instant endDate);

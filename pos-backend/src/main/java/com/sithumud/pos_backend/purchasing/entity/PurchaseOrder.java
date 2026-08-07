@@ -72,6 +72,7 @@ public class PurchaseOrder extends BaseEntity {
     private String notes;
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     @Builder.Default
     private List<PurchaseOrderItem> items = new ArrayList<>();
 
@@ -80,6 +81,7 @@ public class PurchaseOrder extends BaseEntity {
      * Records state transitions, partial receipts, user comments, etc.
      */
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     @Builder.Default
     private List<PurchaseOrderEvent> events = new ArrayList<>();
 

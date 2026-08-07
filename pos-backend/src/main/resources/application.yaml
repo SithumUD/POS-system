@@ -42,6 +42,23 @@ spring:
     username: guest
     password: guest
 
+  # Mail / Brevo SMTP
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp-relay.brevo.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:9d2f57001@smtp-brevo.com}
+    password: ${SPRING_MAIL_PASSWORD:xsmtpsib-8c6c5c19facd68c9f06c237cfcef0c847e7ad1102a2261dad6ad95820ea382a0-UXfpZCs2Vp4ae8lf}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 # Custom Application Properties
 app:
   jwt:
@@ -63,3 +80,8 @@ app:
     allowed-headers: "*"
     allow-credentials: true
 
+  # Custom Email Properties
+  mail:
+    from-email: ${APP_MAIL_FROM:sithumudayangaofficial@gmail.com}
+    from-name: ${APP_MAIL_NAME:pos-system}
+  frontend-url: ${APP_FRONTEND_URL:http://localhost:3000}

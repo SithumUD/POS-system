@@ -16,8 +16,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.sithumud.pos_backend.auth.dto.AcceptInviteRequest;
+import com.sithumud.pos_backend.auth.dto.InvitationDetailsDto;
 
 import java.time.Instant;
 
@@ -29,6 +32,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtTokenProvider tokenProvider;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
@@ -115,5 +119,60 @@ public class AuthService {
         userRepository.save(user);
 
         return UserDto.fromEntity(user);
+    }
+
+    @Transactional(readOnly = true)
+    public InvitationDetailsDto getInvitationDetails(String token) {
+        User user = userRepository.findByInvitationToken(token)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "INVALID_TOKEN", "Invitation link is invalid or expired."));
+
+        if (user.getInvitationTokenExpiresAt() != null && user.getInvitationTokenExpiresAt().isBefore(Instant.now())) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "TOKEN_EXPIRED", "Invitation link has expired.");
+        }
+
+        if (user.getStatus() != UserStatus.INVITED) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "ALREADY_ACCEPTED", "This invitation has already been accepted.");
+        }
+
+        return InvitationDetailsDto.builder()
+                .name(user.getName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .branchName(user.getBranch() != null ? user.getBranch().getName() : "All Branches (Global Access)")
+                .build();
+    }
+
+    @Transactional
+    public AuthResponse acceptInvitation(AcceptInviteRequest request) {
+        User user = userRepository.findByInvitationToken(request.getToken())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "INVALID_TOKEN", "Invitation link is invalid or expired."));
+
+        if (user.getInvitationTokenExpiresAt() != null && user.getInvitationTokenExpiresAt().isBefore(Instant.now())) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "TOKEN_EXPIRED", "Invitation link has expired.");
+        }
+
+        if (user.getStatus() != UserStatus.INVITED) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "ALREADY_ACCEPTED", "This invitation has already been accepted.");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setStatus(UserStatus.ACTIVE);
+        user.setInvitationToken(null);
+        user.setInvitationTokenExpiresAt(null);
+        user.setLastActiveAt(Instant.now());
+
+        userRepository.save(user);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+        String accessToken = tokenProvider.generateAccessTokenForUser(userPrincipal);
+        String refreshToken = tokenProvider.generateRefreshTokenForUser(userPrincipal);
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .expiresIn(tokenProvider.getAccessTokenExpirationMs() / 1000)
+                .user(UserDto.fromEntity(user))
+                .build();
     }
 }

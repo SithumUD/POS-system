@@ -74,22 +74,22 @@ public class BranchController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(branch, "Store branch created successfully"));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{idOrSlug}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Update store branch", description = "Updates branch details, address, phone, manager assignment, terminal count, operating hours, and status.")
     public ResponseEntity<ApiResponse<BranchDto>> updateBranch(
-            @PathVariable("id") UUID id,
+            @PathVariable("idOrSlug") String idOrSlug,
             @Valid @RequestBody UpdateBranchRequest request
     ) {
-        BranchDto branch = branchService.updateBranch(id, request);
+        BranchDto branch = branchService.updateBranch(idOrSlug, request);
         return ResponseEntity.ok(ApiResponse.success(branch, "Store branch updated successfully"));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{idOrSlug}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Deactivate/Remove store branch", description = "Deactivates or closes a store branch.")
-    public ResponseEntity<ApiResponse<Void>> deleteBranch(@PathVariable("id") UUID id) {
-        branchService.deleteBranch(id);
+    public ResponseEntity<ApiResponse<Void>> deleteBranch(@PathVariable("idOrSlug") String idOrSlug) {
+        branchService.deleteBranch(idOrSlug);
         return ResponseEntity.ok(ApiResponse.success(null, "Store branch closed successfully"));
     }
 }

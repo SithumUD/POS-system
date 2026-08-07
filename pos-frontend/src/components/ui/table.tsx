@@ -1,116 +1,68 @@
-"use client"
+import React from 'react';
 
-import * as React from "react"
+export function TableWrap({
+  children,
+  className = '',
+  maxHeight = 'max-h-[640px]'
 
-import { cn } from "@/lib/utils"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+
+
+}: {children: React.ReactNode;className?: string;maxHeight?: string;}) {
   return (
-    <div
-      data-slot="table-container"
-      className="relative w-full overflow-x-auto"
-    >
-      <table
-        data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
-      />
-    </div>
-  )
+    <div className={`overflow-auto thin-scroll ${maxHeight} ${className}`}>
+      <table className="w-full min-w-full border-collapse text-sm">{children}</table>
+    </div>);
+
 }
 
-function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
-  return (
-    <thead
-      data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
-      {...props}
-    />
-  )
-}
+export function Th({
+  children,
+  align = 'left',
+  className = ''
 
-function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
-  return (
-    <tbody
-      data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
-      {...props}
-    />
-  )
-}
 
-function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
-  return (
-    <tfoot
-      data-slot="table-footer"
-      className={cn(
-        "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
-        className
-      )}
-      {...props}
-    />
-  )
-}
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
-  return (
-    <tr
-      data-slot="table-row"
-      className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
-        className
-      )}
-      {...props}
-    />
-  )
-}
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+}: {children?: React.ReactNode;align?: 'left' | 'right' | 'center';className?: string;}) {
+  const alignClass =
+  align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left';
   return (
     <th
-      data-slot="table-head"
-      className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
-        className
-      )}
-      {...props}
-    />
-  )
+      scope="col"
+      className={`sticky top-0 z-10 whitespace-nowrap border-b border-slate-200 bg-slate-50/95 px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-slate-500 backdrop-blur ${alignClass} ${className}`}>
+      
+      {children}
+    </th>);
+
 }
 
-function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+export function Td({
+  children,
+  align = 'left',
+  className = ''
+
+
+
+
+}: {children?: React.ReactNode;align?: 'left' | 'right' | 'center';className?: string;}) {
+  const alignClass =
+  align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left';
   return (
-    <td
-      data-slot="table-cell"
-      className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
-        className
-      )}
-      {...props}
-    />
-  )
+    <td className={`border-b border-slate-100 px-4 py-3.5 align-middle ${alignClass} ${className}`}>
+      {children}
+    </td>);
+
 }
 
-function TableCaption({
-  className,
+export function Tr({
+  children,
+  className = '',
   ...props
-}: React.ComponentProps<"caption">) {
+}: React.HTMLAttributes<HTMLTableRowElement>) {
   return (
-    <caption
-      data-slot="table-caption"
-      className={cn("mt-4 text-sm text-muted-foreground", className)}
-      {...props}
-    />
-  )
-}
+    <tr className={`transition-colors hover:bg-slate-50/70 ${className}`} {...props}>
+      {children}
+    </tr>);
 
-export {
-  Table,
-  TableHeader,
-  TableBody,
-  TableFooter,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableCaption,
 }

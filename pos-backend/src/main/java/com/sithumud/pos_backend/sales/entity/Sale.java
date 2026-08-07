@@ -104,6 +104,7 @@ public class Sale extends BaseEntity {
     private String idempotencyKey;
 
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     @Builder.Default
     private List<SaleItem> items = new ArrayList<>();
 
@@ -112,6 +113,7 @@ public class Sale extends BaseEntity {
      * A SPLIT payment is modelled as two Payment rows (one CASH, one CARD).
      */
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     @Builder.Default
     private List<Payment> payments = new ArrayList<>();
 

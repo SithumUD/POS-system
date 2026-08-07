@@ -73,4 +73,15 @@ public class UserPrincipal implements UserDetails {
     public boolean isEnabled() {
         return status == UserStatus.ACTIVE;
     }
+
+    public boolean isGlobalAccess() {
+        return branchSlug == null;
+    }
+
+    public boolean hasBranchAccess(String requestedBranchSlug) {
+        if (isGlobalAccess() || requestedBranchSlug == null || requestedBranchSlug.isBlank()) {
+            return true;
+        }
+        return branchSlug.equalsIgnoreCase(requestedBranchSlug);
+    }
 }
