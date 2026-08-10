@@ -26,6 +26,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.sithumud.pos_backend.tenant.TenantRepository;
+import com.sithumud.pos_backend.tenant.context.TenantContext;
+import com.sithumud.pos_backend.tenant.entity.Tenant;
+
+// ... (existing code, keeping it below with imports grouped properly) ...
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,6 +39,7 @@ public class BranchService {
 
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
+    private final TenantRepository tenantRepository;
 
     @Transactional(readOnly = true)
     public Page<BranchDto> getBranches(BranchSearchFilter filter, Pageable pageable) {
@@ -77,6 +84,14 @@ public class BranchService {
 
     @Transactional
     public BranchDto createBranch(CreateBranchRequest request) {
+        Tenant tenant = tenantRepository.findById(TenantContext.getTenantId())
+                .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "TENANT_NOT_FOUND", "Current tenant not found."));
+        
+        long currentBranchCount = branchRepository.count();
+        if (currentBranchCount >= tenant.getMaxBranches()) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "LIMIT_EXCEEDED", "Your subscription plan allows a maximum of " + tenant.getMaxBranches() + " branches.");
+        }
+
         String slug = generateSlug(request.getName());
         if (branchRepository.existsBySlug(slug)) {
             slug = slug + "-" + UUID.randomUUID().toString().substring(0, 4);

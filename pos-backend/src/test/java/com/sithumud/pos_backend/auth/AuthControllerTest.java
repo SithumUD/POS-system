@@ -126,10 +126,11 @@ class AuthControllerTest {
         given(authService.getCurrentUserContext(any())).willReturn(mockUserDto);
 
         UserPrincipal userPrincipal = new UserPrincipal(
-                mockUserDto.getId(),
-                mockUserDto.getName(),
-                mockUserDto.getEmail(),
-                "password",
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "Ruwan Silva",
+                "admin@retailos.lk",
+                "encodedPassword",
                 UserStatus.ACTIVE,
                 Role.ADMIN.name(),
                 "colombo",

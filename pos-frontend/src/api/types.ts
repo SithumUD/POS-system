@@ -38,7 +38,7 @@ export interface ApiErrorResponse {
 // 1. Auth & User Administration
 // ----------------------------------------------------------------------
 
-export type Role = 'ADMIN' | 'MANAGER' | 'CASHIER' | 'VIEWER';
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'CASHIER' | 'VIEWER';
 export type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'INVITED';
 
 export interface UserDto {
@@ -97,6 +97,58 @@ export interface UserQueryParams {
 
 export type PermissionKey = 'pos' | 'refunds' | 'products' | 'purchasing' | 'reports' | 'settings';
 export type RolePermissionsDto = Record<Role, Record<PermissionKey, boolean>>;
+
+// ----------------------------------------------------------------------
+// 1.5 Super Admin & Tenant Management
+// ----------------------------------------------------------------------
+
+export type TenantStatus = 'INVITED' | 'PENDING_APPROVAL' | 'ACTIVE' | 'SUSPENDED';
+export type PlanType = 'STARTER' | 'BUSINESS' | 'PROFESSIONAL' | 'ENTERPRISE';
+
+export interface TenantSummaryDto {
+  id: string;
+  name: string;
+  contactEmail: string;
+  businessPhone?: string;
+  businessAddress?: string;
+  plan: PlanType;
+  status: TenantStatus;
+  maxUsers: number;
+  maxBranches: number;
+  maxProducts: number;
+  createdAt: string;
+}
+
+export interface InviteBusinessRequest {
+  email: string;
+  plan: PlanType;
+}
+
+export interface UpdateTenantPlanRequest {
+  plan: PlanType;
+  maxBranches?: number;
+  maxUsers?: number;
+  maxProducts?: number;
+}
+
+export interface SignupInviteDetailsDto {
+  contactEmail: string;
+  plan: PlanType;
+  maxUsers: number;
+  maxBranches: number;
+  maxProducts: number;
+}
+
+export interface TenantSignupRequest {
+  signupToken: string;
+  businessName: string;
+  businessAddress?: string;
+  businessPhone?: string;
+  adminName: string;
+  adminEmail: string;
+  adminPassword?: string;
+}
+
 
 // ----------------------------------------------------------------------
 // 2. Categories & Products

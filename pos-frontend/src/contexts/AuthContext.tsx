@@ -8,7 +8,7 @@ interface AuthContextValue {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password?: string) => Promise<boolean>;
+  login: (email: string, password?: string) => Promise<{ success: boolean; role?: Role }>;
   logout: () => void;
   refetchUser: () => Promise<void>;
 }
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchCurrentUser();
   }, []);
 
-  const login = async (email: string, password?: string): Promise<boolean> => {
+  const login = async (email: string, password?: string): Promise<{ success: boolean; role?: Role }> => {
     setIsLoading(true);
     try {
       const response = await authApi.login({ email, password });
@@ -82,18 +82,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(userVal);
         toast.success(`Welcome back, ${userVal?.name || 'User'}!`);
         setIsLoading(false);
-        return true;
+        return { success: true, role: userVal?.role };
       } else {
         toast.error(response?.message || 'Login failed');
         setIsLoading(false);
-        return false;
+        return { success: false };
       }
     } catch (err: any) {
       console.error('Login error:', err);
       const errorMsg = err?.message || 'Failed to connect to backend server at http://localhost:8080';
       toast.error(errorMsg);
       setIsLoading(false);
-      return false;
+      return { success: false };
     }
   };
 

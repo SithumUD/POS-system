@@ -19,11 +19,13 @@ spring:
   # JPA / Hibernate
   jpa:
     hibernate:
-      ddl-auto: update           # Hibernate manages schema (Flyway disabled)
+      ddl-auto: update           # Hibernate manages schema; data persists across restarts
     show-sql: false
+    open-in-view: false          # MUST be false so Hibernate picks up dynamic TenantContext changes during a request
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        tenant_identifier_resolver: com.sithumud.pos_backend.tenant.config.TenantIdentifierResolver
 
   # Flyway - disabled until Flyway adds PostgreSQL 18 support (or switch to postgres:16)
   flyway:
@@ -61,6 +63,9 @@ spring:
 
 # Custom Application Properties
 app:
+  super-admin:
+    email: superadmin@nexpos.com
+    password: Olusha123
   jwt:
     secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
     access-token-expiration-ms: 86400000 # 24 hours (86400000 ms)

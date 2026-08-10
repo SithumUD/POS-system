@@ -23,31 +23,11 @@ import {
 // ── NexPOS inline SVG logo mark ──────────────────────────────────────────────
 function NexPOSMark({ size = 30 }: { size?: number }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 40 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label="NexPOS logo"
-    >
-      <defs>
-        <linearGradient id="nexSidebarGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#1e1b4b" />
-          <stop offset="100%" stopColor="#3B5BFF" />
-        </linearGradient>
-      </defs>
-      <rect width="40" height="40" rx="9" fill="url(#nexSidebarGrad)" />
-      <path
-        d="M10 28V12l8 10V12M18 22l4-10 8 16V14"
-        stroke="white"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <circle cx="30" cy="12" r="2" fill="#7f8cff" />
-    </svg>
+    <img 
+      src="/logo.png" 
+      alt="NexPOS Logo" 
+      style={{ width: size, height: size, objectFit: 'contain' }} 
+    />
   );
 }
 

@@ -32,6 +32,7 @@ class JwtTokenProviderTest {
     void testGenerateAndValidateAccessToken() {
         UserPrincipal userPrincipal = new UserPrincipal(
                 UUID.randomUUID(),
+                UUID.randomUUID(),
                 "Ruwan Silva",
                 "admin@retailos.lk",
                 "encodedPassword",
@@ -51,6 +52,7 @@ class JwtTokenProviderTest {
     @Test
     void testGenerateAndValidateRefreshToken() {
         UserPrincipal userPrincipal = new UserPrincipal(
+                UUID.randomUUID(),
                 UUID.randomUUID(),
                 "Ruwan Silva",
                 "admin@retailos.lk",

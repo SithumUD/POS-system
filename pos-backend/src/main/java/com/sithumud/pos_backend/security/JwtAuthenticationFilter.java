@@ -16,7 +16,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.sithumud.pos_backend.tenant.context.TenantContext;
+import io.jsonwebtoken.Claims;
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -38,7 +41,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String tokenType = tokenProvider.getTokenType(jwt);
                 if ("ACCESS".equals(tokenType)) {
-                    String username = tokenProvider.getEmailFromToken(jwt);
+                    Claims claims = tokenProvider.getClaimsFromToken(jwt);
+                    String tenantIdStr = claims.get("tenantId", String.class);
+                    if (tenantIdStr != null) {
+                        TenantContext.setTenantId(UUID.fromString(tenantIdStr));
+                    }
+                    
+                    String username = claims.getSubject();
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                     if (userDetails.isEnabled()) {
@@ -51,11 +60,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             }
+            filterChain.doFilter(request, response);
         } catch (Exception ex) {
             log.error("Could not set user authentication in security context", ex);
+            filterChain.doFilter(request, response);
+        } finally {
+            TenantContext.clear();
         }
-
-        filterChain.doFilter(request, response);
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {

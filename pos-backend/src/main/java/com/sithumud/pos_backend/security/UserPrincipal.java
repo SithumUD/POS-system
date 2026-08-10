@@ -17,6 +17,7 @@ import java.util.UUID;
 public class UserPrincipal implements UserDetails {
 
     private final UUID id;
+    private final UUID tenantId;
     private final String name;
     private final String email;
     private final String password;
@@ -34,6 +35,7 @@ public class UserPrincipal implements UserDetails {
 
         return new UserPrincipal(
                 user.getId(),
+                user.getTenantId(),
                 user.getName(),
                 user.getEmail(),
                 user.getPasswordHash(),

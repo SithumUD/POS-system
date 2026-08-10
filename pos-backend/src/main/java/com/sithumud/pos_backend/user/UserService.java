@@ -12,6 +12,9 @@ import com.sithumud.pos_backend.user.dto.RolePermissionMatrixDto;
 import com.sithumud.pos_backend.user.dto.UpdateUserRequest;
 import com.sithumud.pos_backend.user.dto.UserDto;
 import com.sithumud.pos_backend.user.dto.UserSearchFilter;
+import com.sithumud.pos_backend.tenant.TenantRepository;
+import com.sithumud.pos_backend.tenant.context.TenantContext;
+import com.sithumud.pos_backend.tenant.entity.Tenant;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +47,7 @@ public class UserService {
     private final BranchRepository branchRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final TenantRepository tenantRepository;
 
     private final Map<Role, List<String>> rolePermissionsMap = new EnumMap<>(Role.class);
 
@@ -106,6 +110,14 @@ public class UserService {
 
     @Transactional
     public UserDto createUser(CreateUserRequest request) {
+        Tenant tenant = tenantRepository.findById(TenantContext.getTenantId())
+                .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "TENANT_NOT_FOUND", "Current tenant not found."));
+        
+        long currentUserCount = userRepository.count();
+        if (currentUserCount >= tenant.getMaxUsers()) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "LIMIT_EXCEEDED", "Your subscription plan allows a maximum of " + tenant.getMaxUsers() + " users.");
+        }
+
         if (userRepository.existsByEmail(request.getEmail().trim().toLowerCase())) {
             throw new ApiException(HttpStatus.CONFLICT, "EMAIL_ALREADY_EXISTS", "Email is already registered: " + request.getEmail());
         }

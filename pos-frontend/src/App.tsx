@@ -20,6 +20,8 @@ import { AnomalyAlerts } from './pages/AnomalyAlerts';
 import { Branches } from './pages/Branches';
 import { Settings } from './pages/Settings';
 import { CustomerDisplay } from './pages/CustomerDisplay';
+import TenantSignup from './pages/TenantSignup';
+import SuperAdmin from './pages/SuperAdmin';
 
 function RootRoute() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -48,6 +50,7 @@ export function App() {
           <Routes>
             <Route path="/" element={<RootRoute />} />
             <Route path="/login" element={<RootRoute />} />
+            <Route path="/signup" element={<TenantSignup />} />
             <Route path="/accept-invite" element={<AcceptInvite />} />
             <Route
               path="/pos"
@@ -151,6 +154,14 @@ export function App() {
               element={
                 <ProtectedRoute>
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/super-admin"
+              element={
+                <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+                  <SuperAdmin />
                 </ProtectedRoute>
               }
             />

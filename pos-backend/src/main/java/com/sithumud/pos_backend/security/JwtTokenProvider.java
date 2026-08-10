@@ -45,6 +45,9 @@ public class JwtTokenProvider {
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userPrincipal.getId().toString());
+        if (userPrincipal.getTenantId() != null) {
+            claims.put("tenantId", userPrincipal.getTenantId().toString());
+        }
         claims.put("role", userPrincipal.getRole());
         claims.put("type", "ACCESS");
         if (userPrincipal.getBranchSlug() != null) {

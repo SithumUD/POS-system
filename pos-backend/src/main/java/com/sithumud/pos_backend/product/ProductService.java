@@ -32,6 +32,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.sithumud.pos_backend.tenant.TenantRepository;
+import com.sithumud.pos_backend.tenant.context.TenantContext;
+import com.sithumud.pos_backend.tenant.entity.Tenant;
+
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -41,6 +45,7 @@ public class ProductService {
     private final SupplierRepository supplierRepository;
     private final InventoryRepository inventoryRepository;
     private final BranchRepository branchRepository;
+    private final TenantRepository tenantRepository;
 
     @Transactional(readOnly = true)
     public Page<ProductDto> getProducts(ProductSearchFilter filter, Pageable pageable) {
@@ -98,6 +103,14 @@ public class ProductService {
 
     @Transactional
     public ProductDto createProduct(CreateProductRequest request) {
+        Tenant tenant = tenantRepository.findById(TenantContext.getTenantId())
+                .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "TENANT_NOT_FOUND", "Current tenant not found."));
+
+        long currentProductCount = productRepository.count();
+        if (currentProductCount >= tenant.getMaxProducts()) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "LIMIT_EXCEEDED", "Your subscription plan allows a maximum of " + tenant.getMaxProducts() + " products.");
+        }
+
         if (productRepository.existsBySku(request.getSku())) {
             throw new ApiException(HttpStatus.CONFLICT, "DUPLICATE_SKU", "Product SKU '" + request.getSku() + "' already exists.");
         }

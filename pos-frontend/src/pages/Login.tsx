@@ -1,49 +1,51 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { EyeIcon, EyeOffIcon, AlertCircleIcon, Loader2Icon, ShieldCheckIcon, ZapIcon } from 'lucide-react';
 import { Field, inputClass } from '../components/ui/Field';
 import { useAuth } from '../contexts/AuthContext';
 
-// ── Inline NexPOS logo mark (SVG, scales perfectly at any size) ──────────────
 function NexPOSMark({ size = 40 }: { size?: number }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 40 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label="NexPOS logo"
-    >
-      <defs>
-        <linearGradient id="nexLogoGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#1e1b4b" />
-          <stop offset="100%" stopColor="#3B5BFF" />
-        </linearGradient>
-      </defs>
-      <rect width="40" height="40" rx="10" fill="url(#nexLogoGrad)" />
-      {/* Stylized "N" with a lightning-bolt accent */}
-      <path
-        d="M10 28V12l8 10V12M18 22l4-10 8 16V14"
-        stroke="white"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <circle cx="30" cy="12" r="2" fill="#7f8cff" />
-    </svg>
+    <img 
+      src="/logo.png" 
+      alt="NexPOS Logo" 
+      style={{ width: size, height: size, objectFit: 'contain' }} 
+    />
   );
 }
 
 export function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('demo') === 'true') {
+      const autoLogin = async () => {
+        setEmail('demo@business.com');
+        setPassword('demo123');
+        setLoading(true);
+        const { success, role } = await login('demo@business.com', 'demo123');
+        setLoading(false);
+        if (success) {
+          if (role === 'SUPER_ADMIN') {
+            navigate('/super-admin');
+          } else {
+            navigate('/dashboard');
+          }
+        } else {
+          setError('Demo login failed. Please ensure the backend is running and seeded.');
+        }
+      };
+      autoLogin();
+    }
+  }, [location.search, login, navigate]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -54,10 +56,14 @@ export function Login() {
     setError('');
     setLoading(true);
 
-    const success = await login(email, password);
+    const { success, role } = await login(email, password);
     setLoading(false);
     if (success) {
-      navigate('/dashboard');
+      if (role === 'SUPER_ADMIN') {
+        navigate('/super-admin');
+      } else {
+        navigate('/dashboard');
+      }
     } else {
       setError('Invalid credentials or backend connection failure.');
     }

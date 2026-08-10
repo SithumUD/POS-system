@@ -62,4 +62,20 @@ public class AuthController {
         AuthResponse response = authService.acceptInvitation(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Account activated successfully"));
     }
+
+    @GetMapping("/signup-invite/{token}")
+    @Operation(summary = "Get signup invitation details", description = "Returns the plan details for a business signup invitation. Public endpoint.")
+    public ResponseEntity<ApiResponse<com.sithumud.pos_backend.auth.dto.SignupInviteDetailsDto>> getSignupInviteDetails(
+            @org.springframework.web.bind.annotation.PathVariable String token) {
+        var details = authService.getSignupInviteDetails(token);
+        return ResponseEntity.ok(ApiResponse.success(details, "Signup invitation details retrieved successfully"));
+    }
+
+    @PostMapping("/signup")
+    @Operation(summary = "Complete business signup", description = "Submits business and admin account details. Tenant is created in PENDING_APPROVAL state awaiting manual payment confirmation.")
+    public ResponseEntity<ApiResponse<Void>> completeTenantSignup(
+            @Valid @RequestBody com.sithumud.pos_backend.auth.dto.TenantSignupRequest request) {
+        authService.completeTenantSignup(request);
+        return ResponseEntity.ok(ApiResponse.success(null, "Signup submitted successfully. Your account will be activated after payment confirmation."));
+    }
 }

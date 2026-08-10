@@ -21,4 +21,10 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     boolean existsByEmail(String email);
 
     Optional<User> findByInvitationToken(String token);
+
+    @Query(value = "SELECT tenant_id FROM users WHERE email = :email", nativeQuery = true)
+    Optional<UUID> findTenantIdByEmail(@Param("email") String email);
+
+    @Query(value = "SELECT tenant_id FROM users WHERE invitation_token = :token", nativeQuery = true)
+    Optional<UUID> findTenantIdByInvitationToken(@Param("token") String token);
 }
