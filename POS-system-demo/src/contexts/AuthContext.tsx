@@ -32,6 +32,7 @@ interface AuthContextValue {
   login: (email: string, password?: string) => Promise<{ success: boolean; role?: Role }>;
   logout: () => void;
   refetchUser: () => Promise<void>;
+  setRole: (role: Role) => void;
 }
 
 const DEMO_USERS: Record<string, UserDto & { password: string }> = {
@@ -144,6 +145,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // No-op in demo mode
   };
 
+  const setRole = (role: Role) => {
+    if (user) {
+      const updated = { ...user, role };
+      setUser(updated);
+      try {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -154,6 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         refetchUser,
+        setRole,
       }}
     >
       {children}

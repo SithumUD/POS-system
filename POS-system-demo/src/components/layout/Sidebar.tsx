@@ -31,24 +31,37 @@ function NexPOSMark({ size = 30 }: { size?: number }) {
   );
 }
 
-const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
-  { to: '/pos', label: 'POS Terminal', icon: ScanBarcodeIcon },
-  { to: '/products', label: 'Products', icon: PackageIcon },
-  { to: '/inventory', label: 'Inventory', icon: BoxesIcon },
-  { to: '/purchase-orders', label: 'Purchase Orders', icon: ClipboardListIcon },
-  { to: '/suppliers', label: 'Suppliers', icon: TruckIcon },
-  { to: '/sales-history', label: 'Sales History', icon: ReceiptTextIcon },
-  { to: '/reports', label: 'Reports', icon: BarChart3Icon },
-  { to: '/finance', label: 'Finance & Analytics', icon: CoinsIcon, restricted: true },
-  { to: '/alerts', label: 'Anomaly Alerts', icon: ShieldAlertIcon },
-  { to: '/branches', label: 'Branches', icon: StoreIcon },
-  { to: '/settings', label: 'Settings', icon: SettingsIcon },
+import { Role } from '../../types';
+
+const navItems: Array<{
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  allowedRoles: Role[];
+  badge?: string;
+}> = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon, allowedRoles: ['ADMIN', 'MANAGER'] },
+  { to: '/pos', label: 'POS Terminal', icon: ScanBarcodeIcon, allowedRoles: ['ADMIN', 'MANAGER', 'CASHIER'] },
+  { to: '/products', label: 'Products', icon: PackageIcon, allowedRoles: ['ADMIN', 'MANAGER'] },
+  { to: '/inventory', label: 'Inventory', icon: BoxesIcon, allowedRoles: ['ADMIN', 'MANAGER'] },
+  { to: '/purchase-orders', label: 'Purchase Orders', icon: ClipboardListIcon, allowedRoles: ['ADMIN', 'MANAGER'] },
+  { to: '/suppliers', label: 'Suppliers', icon: TruckIcon, allowedRoles: ['ADMIN', 'MANAGER'] },
+  { to: '/sales-history', label: 'Sales History', icon: ReceiptTextIcon, allowedRoles: ['ADMIN', 'MANAGER', 'CASHIER'] },
+  { to: '/reports', label: 'Reports', icon: BarChart3Icon, allowedRoles: ['ADMIN', 'MANAGER'] },
+  { to: '/finance', label: 'Finance & Analytics', icon: CoinsIcon, allowedRoles: ['ADMIN', 'MANAGER'], badge: 'Admin/Mgr' },
+  { to: '/alerts', label: 'Anomaly Alerts', icon: ShieldAlertIcon, allowedRoles: ['ADMIN', 'MANAGER'] },
+  { to: '/branches', label: 'Branches', icon: StoreIcon, allowedRoles: ['ADMIN'] },
+  { to: '/settings', label: 'Settings', icon: SettingsIcon, allowedRoles: ['ADMIN', 'MANAGER'] },
 ];
 
 export function Sidebar() {
   const { alerts, settings } = useStore();
   const { user, logout } = useAuth();
+
+  const userRole = (user?.role || 'CASHIER') as Role;
+  const visibleNavItems = navItems.filter((item) =>
+    item.allowedRoles.includes(userRole)
+  );
 
   const openAlerts = alerts.filter(
     (a) =>
@@ -77,7 +90,7 @@ export function Sidebar() {
 
       <nav aria-label="Main" className="flex-1 overflow-y-auto p-3 thin-scroll">
         <ul className="space-y-0.5">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
@@ -98,9 +111,9 @@ export function Sidebar() {
                       aria-hidden="true"
                     />
                     <span className="flex-1 truncate">{item.label}</span>
-                    {item.restricted && (
+                    {item.badge && (
                       <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600 ring-1 ring-inset ring-indigo-200">
-                        Admin/Mgr
+                        {item.badge}
                       </span>
                     )}
                     {item.to === '/alerts' && openAlerts > 0 && (

@@ -36,6 +36,8 @@ export function Login() {
         if (success) {
           if (role === 'SUPER_ADMIN') {
             navigate('/super-admin');
+          } else if (role === 'CASHIER') {
+            navigate('/pos');
           } else {
             navigate('/dashboard');
           }
@@ -61,6 +63,8 @@ export function Login() {
     if (success) {
       if (role === 'SUPER_ADMIN') {
         navigate('/super-admin');
+      } else if (role === 'CASHIER') {
+        navigate('/pos');
       } else {
         navigate('/dashboard');
       }

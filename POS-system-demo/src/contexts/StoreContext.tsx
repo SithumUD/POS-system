@@ -152,14 +152,21 @@ let tfrSeq = 350;
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, demoInitialState);
-  const { user, isAuthenticated } = useAuth();
-  const [currentUserRole, setCurrentUserRole] = useState<Role>('ADMIN');
+  const { user, isAuthenticated, setRole } = useAuth();
+  const [currentUserRole, setCurrentUserRoleState] = useState<Role>('ADMIN');
 
   useEffect(() => {
     if (user?.role) {
-      setCurrentUserRole(user.role as Role);
+      setCurrentUserRoleState(user.role as Role);
     }
-  }, [user]);
+  }, [user?.role]);
+
+  const handleSetRole = (newRole: Role) => {
+    setCurrentUserRoleState(newRole);
+    if (setRole) {
+      setRole(newRole);
+    }
+  };
 
   const value = useMemo<StoreValue>(() => {
     const availableStock = (productId: string) => {
@@ -172,7 +179,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return {
       ...state,
       currentUserRole,
-      setCurrentUserRole,
+      setCurrentUserRole: handleSetRole,
       taxRate: (state.settings?.taxRate ?? 10) / 100,
       totals: computeTotals(state.cart, state.discount, (state.settings?.taxRate ?? 10) / 100),
       availableStock,

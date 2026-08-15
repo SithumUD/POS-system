@@ -7,7 +7,7 @@ import { BranchId } from '../../types';
 
 export function PosTopBar() {
   const { branch, setBranch, online, queued, toggleOnline, branches } = useStore();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const active = branches.find((b) => b.id === branch || b.slug === branch) ?? branches[0];
   const activeShort = active ? (active.shortName || (active as any).short || active.name) : 'Colombo Main';
 
@@ -35,6 +35,7 @@ export function PosTopBar() {
   });
 
   const userName = user?.name || 'Cashier';
+  const userRole = user?.role || 'CASHIER';
   const initials = userName
     .split(' ')
     .map((n) => n[0])
@@ -87,6 +88,9 @@ export function PosTopBar() {
           {initials}
         </span>
         <span className="font-medium text-slate-900">{userName}</span>
+        <span className="rounded bg-brand-50 px-1.5 py-0.5 text-[10px] font-bold text-brand-700 uppercase tracking-wider">
+          {userRole}
+        </span>
         <span className="text-slate-300">·</span>
         <span className="text-slate-500">Active Shift</span>
         <span className="text-slate-300">·</span>
@@ -105,34 +109,46 @@ export function PosTopBar() {
           aria-pressed={!online}
           title="Toggle terminal connectivity"
           className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium ring-1 ring-inset transition-colors ${
-          online ?
-          'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100' :
-          'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100'}`
-          }>
-          
-          {online ?
-          <>
+            online
+              ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100'
+              : 'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100'
+          }`}
+        >
+          {online ? (
+            <>
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
               Online · synced
-            </> :
-
-          <>
+            </>
+          ) : (
+            <>
               <span className="h-2 w-2 rounded-full bg-amber-500" />
               Offline · {queued} sale{queued === 1 ? '' : 's'} queued
             </>
-          }
+          )}
         </button>
-        <Link
-          to="/dashboard"
-          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50">
-          
-          <LogOutIcon className="h-3.5 w-3.5" aria-hidden="true" />
-          Exit till
-        </Link>
+
+        {userRole === 'CASHIER' ? (
+          <button
+            onClick={logout}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50/50 px-3 text-xs font-medium text-red-600 transition-colors hover:bg-red-100"
+          >
+            <LogOutIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            Sign Out
+          </button>
+        ) : (
+          <Link
+            to="/dashboard"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+          >
+            <LogOutIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            Exit till
+          </Link>
+        )}
       </div>
-    </header>);
+    </header>
+  );
 
 }

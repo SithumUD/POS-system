@@ -24,9 +24,15 @@ import TenantSignup from './pages/TenantSignup';
 import SuperAdmin from './pages/SuperAdmin';
 
 function RootRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   if (isLoading) return null;
   if (isAuthenticated) {
+    if (user?.role === 'SUPER_ADMIN') {
+      return <Navigate to="/super-admin" replace />;
+    }
+    if (user?.role === 'CASHIER') {
+      return <Navigate to="/pos" replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
   return <Login />;
@@ -55,7 +61,7 @@ export function App() {
             <Route
               path="/pos"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER', 'CASHIER']}>
                   <PosTerminal />
                 </ProtectedRoute>
               }
@@ -64,7 +70,7 @@ export function App() {
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
                   <Dashboard />
                 </ProtectedRoute>
               }
@@ -72,7 +78,7 @@ export function App() {
             <Route
               path="/products"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
                   <Products />
                 </ProtectedRoute>
               }
@@ -80,7 +86,7 @@ export function App() {
             <Route
               path="/inventory"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
                   <Inventory />
                 </ProtectedRoute>
               }
@@ -88,7 +94,7 @@ export function App() {
             <Route
               path="/purchase-orders"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
                   <PurchaseOrders />
                 </ProtectedRoute>
               }
@@ -96,7 +102,7 @@ export function App() {
             <Route
               path="/purchase-orders/:id"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
                   <PurchaseOrderDetail />
                 </ProtectedRoute>
               }
@@ -104,7 +110,7 @@ export function App() {
             <Route
               path="/suppliers"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
                   <Suppliers />
                 </ProtectedRoute>
               }
@@ -112,7 +118,7 @@ export function App() {
             <Route
               path="/sales-history"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER', 'CASHIER']}>
                   <SalesHistory />
                 </ProtectedRoute>
               }
@@ -120,7 +126,7 @@ export function App() {
             <Route
               path="/reports"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
                   <Reports />
                 </ProtectedRoute>
               }
@@ -136,7 +142,7 @@ export function App() {
             <Route
               path="/alerts"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
                   <AnomalyAlerts />
                 </ProtectedRoute>
               }
@@ -144,7 +150,7 @@ export function App() {
             <Route
               path="/branches"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN']}>
                   <Branches />
                 </ProtectedRoute>
               }
@@ -152,7 +158,7 @@ export function App() {
             <Route
               path="/settings"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
                   <Settings />
                 </ProtectedRoute>
               }
