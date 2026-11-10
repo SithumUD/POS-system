@@ -79,6 +79,8 @@ class AuthServiceTest {
                 .password("admin123")
                 .build();
 
+        UUID tenantId = UUID.randomUUID();
+        given(userRepository.findTenantIdByEmail("admin@retailos.lk")).willReturn(Optional.of(tenantId));
         given(authenticationManager.authenticate(any())).willReturn(authentication);
         given(authentication.getPrincipal()).willReturn(mockPrincipal);
         given(userRepository.findByEmailWithBranch("admin@retailos.lk")).willReturn(Optional.of(mockUser));
@@ -101,6 +103,8 @@ class AuthServiceTest {
                 .password("wrongpassword")
                 .build();
 
+        UUID tenantId = UUID.randomUUID();
+        given(userRepository.findTenantIdByEmail("admin@retailos.lk")).willReturn(Optional.of(tenantId));
         given(authenticationManager.authenticate(any())).willThrow(new BadCredentialsException("Bad credentials"));
 
         assertThrows(ApiException.class, () -> authService.login(loginRequest));
@@ -112,9 +116,11 @@ class AuthServiceTest {
                 .refreshToken("valid-refresh-token")
                 .build();
 
+        UUID tenantId = UUID.randomUUID();
         given(tokenProvider.validateToken("valid-refresh-token")).willReturn(true);
         given(tokenProvider.getTokenType("valid-refresh-token")).willReturn("REFRESH");
         given(tokenProvider.getEmailFromToken("valid-refresh-token")).willReturn("admin@retailos.lk");
+        given(userRepository.findTenantIdByEmail("admin@retailos.lk")).willReturn(Optional.of(tenantId));
         given(userRepository.findByEmailWithBranch("admin@retailos.lk")).willReturn(Optional.of(mockUser));
         given(tokenProvider.generateAccessTokenForUser(any())).willReturn("new-access-token");
         given(tokenProvider.generateRefreshTokenForUser(any())).willReturn("new-refresh-token");

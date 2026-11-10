@@ -27,7 +27,7 @@ import { useStore } from '../contexts/StoreContext';
 import { formatCurrency } from '../utils/currency';
 import { formatShortDateTime } from '../utils/time';
 import { summaryStats, withinDays } from '../utils/analytics';
-import { Branch, BranchStatus, TransferStatus } from '../types';
+import { Branch, BranchStatus, TransferStatus, Transfer } from '../types';
 
 const statusTones: Record<BranchStatus, 'green' | 'amber' | 'blue'> = {
   OPEN: 'green',

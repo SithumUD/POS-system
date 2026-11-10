@@ -322,6 +322,14 @@ export const permissionLabels: { key: keyof RolePermissions['ADMIN']; label: str
 ];
 
 export const rolePermissions: RolePermissions = {
+  SUPER_ADMIN: {
+    pos: true,
+    refunds: true,
+    products: true,
+    purchasing: true,
+    reports: true,
+    settings: true
+  },
   ADMIN: {
     pos: true,
     refunds: true,

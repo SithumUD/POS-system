@@ -695,9 +695,14 @@ export interface AskDataRequest {
 }
 
 export interface AskDataResponse {
-  summaryText: string;
-  metricsPayload: Record<string, unknown>;
-  recommendations: string[];
+  query?: string;
+  intent?: string;
+  summaryText?: string;
+  textSummary?: string;
+  answer?: string;
+  metricsPayload?: Record<string, unknown>;
+  recommendations?: string[];
+  executiveRecommendation?: string;
 }
 
 // ----------------------------------------------------------------------

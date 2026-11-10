@@ -55,7 +55,7 @@ export type AnomalySeverity = 'HIGH' | 'MEDIUM' | 'LOW';
 export type Severity = AnomalySeverity;
 export type AnomalyStatus = 'NEW' | 'INVESTIGATING' | 'REVIEWED' | 'DISMISSED';
 export type AlertStatus = AnomalyStatus;
-export type Role = 'ADMIN' | 'MANAGER' | 'CASHIER' | 'VIEWER';
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'CASHIER' | 'VIEWER';
 export type UserRole = Role;
 export type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'INVITED';
 export type UnitOfMeasure = 'EACH' | 'PCS' | 'BOTTLE' | 'PACK' | 'BOX' | 'KG' | 'G' | 'L' | 'ML' | 'DOZEN';
@@ -172,6 +172,9 @@ export interface Sale extends BaseResource {
   tendered?: number;
   payment?: PaymentMethod; // primary payment method helper
   at?: ISOString; // alias for soldAt / createdAt
+  branchSlug?: string;
+  branchName?: string;
+  cashierName?: string;
 }
 
 export interface HeldSaleItem extends BaseResource {

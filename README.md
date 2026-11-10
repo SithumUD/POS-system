@@ -219,25 +219,32 @@ The system spans **three sub-projects** in a monorepo:
 
 ---
 
-### Step 1 — Start Infrastructure
+### Step 1 — Start Services with Docker Compose
 
-Start PostgreSQL, Redis, and RabbitMQ with a single command from the `pos-backend` directory:
+#### Option A: Full Containerized Stack (Recommended)
+Start PostgreSQL, Redis, RabbitMQ, and the Spring Boot Backend with a single command from the project root:
 
 ```bash
-cd pos-backend
-docker compose up -d
+docker compose up -d --build
 ```
 
-| Service | URL | Credentials |
-|---|---|---|
-| PostgreSQL | `localhost:5432` | postgres / admin123 (db: posdb) |
-| Redis | `localhost:6379` | — |
-| RabbitMQ Management UI | `http://localhost:15672` | guest / guest |
+| Service | Container Name | URL | Credentials / Notes |
+|---|---|---|---|
+| **Spring Boot Backend** | `pos-backend` | `http://localhost:8080` | Production JRE 21 Container |
+| **PostgreSQL** | `pos-postgres` | `localhost:5432` | `postgres` / `admin123` (db: `posdb`) |
+| **Redis** | `pos-redis` | `localhost:6379` | Cache & Session Store |
+| **RabbitMQ Management** | `pos-rabbitmq` | `http://localhost:15672` | `guest` / `guest` |
+
+#### Option B: Infrastructure Only (for local backend debugging)
+```bash
+docker compose up -d postgres redis rabbitmq
+```
 
 ---
 
-### Step 2 — Run the Backend
+### Step 2 — Run the Backend (if running locally)
 
+If you chose Option B above:
 ```bash
 cd pos-backend
 
@@ -250,10 +257,10 @@ mvnw.cmd spring-boot:run
 
 The backend starts on **`http://localhost:8080`**.
 
-Flyway automatically applies all database migrations from `src/main/resources/db/migration/` on startup.
+Hibernate automatically initializes and manages the schema with demo seed data on first run.
 
-> **Swagger UI:** `http://localhost:8080/swagger-ui.html`  
-> **Health check:** `http://localhost:8080/actuator/health`
+> **Health check:** `http://localhost:8080/api/v1/health`  
+> **Swagger UI:** `http://localhost:8080/swagger-ui.html`
 
 #### Key Environment Variables
 
